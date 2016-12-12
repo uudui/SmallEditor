@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv=X-UA-Compatible>
+    <meta content="width=device-width,initial-scale=1" name=viewport>
+    <title>SmallEditor Demo</title>
+    <link rel="stylesheet" href="./css/normalize.css"/>
+    <link href="http://cdn.staticfile.org/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/small-editor.css"/>
+    <script type="text/javascript" src="./js/jquery-2.2.4.min.js"></script>
+    <script type="text/javascript" src="./js/jquery.SmallEditor.js"></script>
+</head>
+<body>
+<style>
+
+    .main {
+        margin: 0 auto;
+        width: 600px;
+    }
+
+    .main textarea {
+        width: 400px;
+        height: 100px;
+    }
+</style>
+<div class="main">
+    <h1>This is SmallEditor Example.</h1>
+    <textarea name="body" id="post-body"></textarea>
+
+    <textarea name="body" class="post-body0"></textarea>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $('#post-body').smallEditor({});
+    })
+</script>
+
+
+</div>
+
+</body>
+</html>
