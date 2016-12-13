@@ -13,17 +13,13 @@
     border-bottom: 1px solid #ededed;
     background-color: #fff;
     display: block;
+    padding: 5px;
 }
+
 .editor-container .editor-toolbar:after {
     content: " ";
     display: block;
     clear: both;
-}
-.editor-toolbar ul,
-.editor-toolbar li {
-    list-style: none;
-    margin: 0;
-    padding: 0;
 }
 
 .editor-toolbar .editor-btn {
@@ -61,11 +57,13 @@
 }
 
 .editor-toolbar .separator {
-    display: inline;
+    display: inline-block;
+    float: left;
+    vertical-align: top;
     width: 1px;
     height: 20px;
     padding: 0px;
-    margin: 8px 10px 0 10px;
+    margin: 8px 5px 0 5px;
     background: #f4f4f4;
 }
 
@@ -86,6 +84,7 @@
     font-size: 16px;
     font-family: sans-serif;
     min-height: 300px;
+    max-height: 500px;
     border-bottom: 1px solid #ededed;
 }
 
@@ -114,9 +113,15 @@
 }
 
 .editor-body-wrap .editor-body p {
-    margin: 5px 0
+    margin: 5px 0;
+    line-height: 1.6;
 }
 
+.editor-body-wrap .editor-body blockquote {
+    border-left: 3px solid #000;
+    margin: 0;
+    padding: 0 0 0 15px;
+}
 
 
 

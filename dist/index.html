@@ -5,7 +5,6 @@
     <meta content="IE=edge" http-equiv=X-UA-Compatible>
     <meta content="width=device-width,initial-scale=1" name=viewport>
     <title>SmallEditor Demo</title>
-    <link rel="stylesheet" href="./css/normalize.css"/>
     <link rel="stylesheet" href="./css/font-awesome.css"/>
     <link rel="stylesheet" href="./css/small-editor.css"/>
     <script type="text/javascript" src="./js/jquery-2.2.4.min.js"></script>
@@ -13,22 +12,28 @@
 </head>
 <body>
 <style>
-
     .main {
         margin: 0 auto;
-        width: 600px;
+        width: 100%;
+        background: #fff;
+    }
+    .main h1 {
+        color: #666;
+        padding: 10px;
     }
 
-    .main textarea {
-        width: 400px;
-        height: 100px;
+    .submit-btn {
+        margin: 10px;
+        padding: 3px 10px;
     }
 </style>
 <div class="main">
-    <h1>This is SmallEditor Example.</h1>
-    <textarea name="body" id="post-body"></textarea>
+    <form action="#" method="post">
+        <h1>SmallEditor Example.</h1>
+        <textarea name="body" id="post-body"></textarea>
 
-    <textarea name="body" class="post-body0"></textarea>
+        <input type="submit" class="submit-btn" value="提交内容">
+    </form>
 
 </div>
 
