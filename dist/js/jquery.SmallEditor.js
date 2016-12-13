@@ -31,9 +31,11 @@
         var TOOLBAR_HTML = "<div class='editor-container'><div class='editor-toolbar'><ul>";
         TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='加粗(Ctr + B)' data-command='bold'><i class='fa fa-bold'></i></a></li>";
         TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='斜体(Ctr + I)' data-command='italic'><i class='fa fa-italic'></i></a></li>";
+        TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='下划线(Ctr + U)' data-command='underline'><i class='fa fa-underline'></i></a></li>";
+        TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='删除线' data-command='strikethrough'><i class='fa fa-strikethrough'></i></a></li>";
         //TOOLBAR_HTML += "<li><div class='separator'></div></li>";
-        TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='有序列表Ctrl + 7' data-command='insertOrderedList'><i class='fa fa-list-ol'></i></a></li>";
-        TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='无序列表 Ctrl + 8' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></li>";
+        TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='有序列表' data-command='insertOrderedList'><i class='fa fa-list-ol'></i></a></li>";
+        TOOLBAR_HTML += "<li class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></li>";
         TOOLBAR_HTML += "</ul></div>";
 
         EDITOR_HTML += TOOLBAR_HTML;
