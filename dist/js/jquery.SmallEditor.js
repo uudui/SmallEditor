@@ -8,10 +8,9 @@
     'use strict';
 
     var Editor = function (element, options) {
-        this.textareaObj = $(element);
+        this.element = $(element);
         this.optinos = $.extend({}, Editor.DEFAULTS, options);
         this.editor = this.buildEditor();
-        this.contenteditable = this.editor.find(".editor-body");
     };
 
     Editor.VERSION = '0.1.0';
@@ -31,7 +30,7 @@
         //var tools = options.tools;
         //TODO 自定义工具栏
         var EDITOR_HTML = "<div class='editor-container'>";
-        var TOOLBAR_HTML = "<div class='editor-container'><div class='editor-toolbar'>";
+        var TOOLBAR_HTML = "<div class='editor-container' id='editor-container'><div class='editor-toolbar'>";
         TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='加粗(Ctr + B)' data-command='bold'><i class='fa fa-bold'></i></a></div>";
         TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='斜体(Ctr + I)' data-command='italic'><i class='fa fa-italic'></i></a></div>";
         TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='下划线(Ctr + U)' data-command='underline'><i class='fa fa-underline'></i></a></div>";
@@ -42,12 +41,18 @@
         TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></div>";
         TOOLBAR_HTML += "</div>";
         EDITOR_HTML += TOOLBAR_HTML;
-        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + this.textareaObj.val().trim() + " </div></div>";
+        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + this.element.val().trim() + " </div></div>";
 
         var _editor = $(EDITOR_HTML);
-        this.textareaObj.after(_editor);
-        this.textareaObj.hide();
+        this.element.after(_editor);
+        this.element.hide();
+
+        _this.contenteditable = _editor.find(".editor-body");
+        _this.editor =_editor;
+
+        _this.selectEnd();
         _editor.find(".editor-body").focus();
+        _this.detectState();
         //Toolbar 点击处理
         _editor.on('click', '[data-command]', function (event) {
             event.preventDefault();
@@ -55,7 +60,8 @@
             if (command) {
                 _this.focus();
                 if (command === 'blockquote') {
-                    document.execCommand('formatBlock', false, command);
+                    //document.execCommand('formatBlock', false, command);
+                    _this.blockquote();
                 } else {
                     document.execCommand(command, false, null);
                 }
@@ -65,6 +71,7 @@
 
         //Editor blur 处理
         _editor.on('blur', '.editor-body', function (event) {
+            _this.storeRange();
             _this.detectState();
         })
 
@@ -75,12 +82,11 @@
 
         // Editor paste 处理
         _editor.on('paste', '.editor-body', function (event) {
-            _this.processPaste();
+            _this.clearPasteHtml();
         })
-
-
         return _editor;
     }
+
 
     Editor.prototype.detectState = function () {
         var _this = this, _options = _this.optinos, activeClass = _options.activeClass;
@@ -127,12 +133,13 @@
     };
 
     //清除粘贴的Html标签
-    Editor.prototype.processPaste = function () {
-        var _this = this, _contenteditable = _this.contenteditable, _options = _this.optinos;
+    Editor.prototype.clearPasteHtml = function () {
+        var _this = this, _contenteditable = _this.contenteditable,
+            _options = _this.optinos;
         return setTimeout(function () {
-            //将div统一进行替换
+            //将div统一进行替换成p标签
             _contenteditable.find('div').each(function () {
-                $(this).replaceWith($("<p>").append($(this).contents()));
+                $(this).replaceWith($('<p>').append($(this).contents()));
             });
 
             //替换不允许的attrs 和 tags
@@ -158,7 +165,35 @@
     //设置编辑器段落分割标签
     Editor.prototype.setDefaultParagraphSeparator = function () {
         document.execCommand('defaultParagraphSeparator', false, 'p');
-    }
+    };
+
+    Editor.prototype.blockquote = function() {
+        var _this = this, $blockquote, $contents, end, range, rangeAncestor, selection, start;
+        selection = window.getSelection();
+        range = selection.getRangeAt(0);
+        rangeAncestor = range.commonAncestorContainer;
+        $blockquote = $(rangeAncestor).closest("blockquote");
+        if ($blockquote.length) {
+            $contents = $blockquote.contents();
+            $blockquote.replaceWith($contents);
+            _this.selectContents($contents);
+        } else {
+            start = $(range.startContainer).closest("p, h1, h2, h3, h4, pre")[0];
+            end = $(range.endContainer).closest("p, h1, h2, h3, h4, pre")[0];
+            range.setStartBefore(start);
+            range.setEndAfter(end);
+            $blockquote = $("<blockquote>");
+            $blockquote.html(range.extractContents()).find("blockquote").each(function() {
+                return $(this).replaceWith($(this).html());
+            });
+            range.insertNode($blockquote[0]);
+            selection.selectAllChildren($blockquote[0]);
+            if ($blockquote.next().length === 0) {
+                $blockquote.after("<p><br></p>");
+            }
+        }
+    };
+
 
     Editor.prototype.selectEnd = function () {
         var selection = document.getSelection();
@@ -191,12 +226,12 @@
     };
 
     Editor.prototype.change = function (editor) {
-        this.textareaObj.val(editor.find('div.editor-body').html());
-    }
+        this.element.val(editor.find('div.editor-body').html());
+    };
 
     Editor.prototype.focus = function () {
         this.contenteditable.focus();
-    }
+    };
 
 
     $.fn.smallEditor = function (options) {
