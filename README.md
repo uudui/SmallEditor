@@ -1,5 +1,5 @@
 # SmallEditor
-This is a Small WYSIWYG editor with jQuery.
+This is a Small WYSIWYG HTM5 rich text editor with jQuery.
 
 <img src="https://raw.githubusercontent.com/uudui/SmallEditor/master/dist/images/SmallEditor.png" width="600" />
 
@@ -10,12 +10,12 @@ This is a Small WYSIWYG editor with jQuery.
 - PlaceHolder for WYSIWYG editor;
 
 
-## Browser support
+## Supported Browsers
 
-- Safari
-- Chrome
-- Firefox
 - IE 10+
+- Chrome
+- Safari
+- Firefox
 
 ## Demo
 

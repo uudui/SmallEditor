@@ -8,9 +8,10 @@
     'use strict';
 
     var Editor = function (element, options) {
-        this.element = $(element);
+        this.textareaObj = $(element);
         this.optinos = $.extend({}, Editor.DEFAULTS, options);
-        this.editor = this.buildEditor(this.element, this.optinos);
+        this.editor = this.buildEditor();
+        this.contenteditable = this.editor.find(".editor-body");
     };
 
     Editor.VERSION = '0.1.0';
@@ -18,12 +19,14 @@
     Editor.DEFAULTS = {
         tools: ['bold', 'italic', 'underline', 'strikethrough', 'list-ol', 'list-ul'],
         activeClass: 'active',
-        placeholder: '请输入内容…'
+        placeholder: '请输入内容…',
+        allowedTags: ["p", "br", "img", "a", "b", "i", "strike", "u", "h1", "h2", "h3", "h4", "pre", "code", "ol", "ul", "li", "blockquote"],
+        unAllowedAttrs: ['style', 'class', 'id', 'name', 'width', 'height', 'title', 'data-*']
     }
 
     //Editor 初始化
-    Editor.prototype.buildEditor = function (element, options) {
-        var _this = this;
+    Editor.prototype.buildEditor = function () {
+        var _this = this, _options = _this.optinos;
         _this.setDefaultParagraphSeparator();
         //var tools = options.tools;
         //TODO 自定义工具栏
@@ -39,21 +42,21 @@
         TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></div>";
         TOOLBAR_HTML += "</div>";
         EDITOR_HTML += TOOLBAR_HTML;
-        EDITOR_HTML += "<div class='editor-body-wrap'><div class='editor-body' contenteditable='true' placeholder='" + options.placeholder + "'>" + element.val() +" </div></div>";
+        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + this.textareaObj.val().trim() + " </div></div>";
 
         var _editor = $(EDITOR_HTML);
-        element.after(_editor);
-        element.hide();
+        this.textareaObj.after(_editor);
+        this.textareaObj.hide();
         _editor.find(".editor-body").focus();
         //Toolbar 点击处理
         _editor.on('click', '[data-command]', function (event) {
             event.preventDefault();
             var command = $(this).data("command");
             if (command) {
-                _editor.find(".editor-body").focus();
+                _this.focus();
                 if (command === 'blockquote') {
                     document.execCommand('formatBlock', false, command);
-                }else {
+                } else {
                     document.execCommand(command, false, null);
                 }
                 _this.detectState();
@@ -70,8 +73,9 @@
             _this.detectState();
         })
 
+        // Editor paste 处理
         _editor.on('paste', '.editor-body', function (event) {
-
+            _this.processPaste();
         })
 
 
@@ -82,7 +86,6 @@
         var _this = this, _options = _this.optinos, activeClass = _options.activeClass;
         _this.editor.find("[data-command]").each(function (index, element) {
             var command = $(element).data("command");
-
             //console.log("==========> has command " + command + "?" + document.queryCommandState(command) )
             if (_this.isStateOn(command)) {
                 $(element).addClass(activeClass);
@@ -92,11 +95,11 @@
         })
     }
 
-    Editor.prototype.isStateOn = function(commmand) {
+    Editor.prototype.isStateOn = function (commmand) {
         var _this = this;
         if (document.queryCommandState(commmand) === true) {
             return true;
-        }else {
+        } else {
             if (_this.commonAncestorContainer()) {
                 return $(this.commonAncestorContainer()).closest(commmand).length !== 0;
             }
@@ -104,14 +107,14 @@
         }
     }
 
-    Editor.prototype.commonAncestorContainer = function() {
+    Editor.prototype.commonAncestorContainer = function () {
         var selection = document.getSelection();
         if (selection.rangeCount !== 0) {
             return selection.getRangeAt(0).commonAncestorContainer;
         }
     }
 
-    Editor.prototype.selectContents = function(contents) {
+    Editor.prototype.selectContents = function (contents) {
         var end, range, selection, start;
         selection = window.getSelection();
         range = selection.getRangeAt(0);
@@ -123,17 +126,81 @@
         return selection.addRange(range);
     };
 
+    //清除粘贴的Html标签
+    Editor.prototype.processPaste = function () {
+        var _this = this, _contenteditable = _this.contenteditable, _options = _this.optinos;
+        return setTimeout(function () {
+            //将div统一进行替换
+            _contenteditable.find('div').each(function () {
+                $(this).replaceWith($("<p>").append($(this).contents()));
+            });
+
+            //替换不允许的attrs 和 tags
+            _contenteditable.find(':not(' + _options.allowedTags.join() + ')').each(function () {
+                var _element = $(this);
+                if (_element.contents().length) {
+                    _element.replaceWith(_element.contents());
+                } else {
+                    _element.remove();
+                }
+            });
+
+            _contenteditable.find('*').each(function() {
+                var $element = $(this), i;
+                for (i in _options.unAllowedAttrs) {
+                    $element.removeAttr(_options.unAllowedAttrs[i]);
+                }
+            });
+        }, 100)
+    }
+
+
     //设置编辑器段落分割标签
     Editor.prototype.setDefaultParagraphSeparator = function () {
         document.execCommand('defaultParagraphSeparator', false, 'p');
     }
 
+    Editor.prototype.selectEnd = function () {
+        var selection = document.getSelection();
+        selection.selectAllChildren(this.contenteditable[0]);
+        return selection.collapseToEnd();
+    };
+
+    Editor.prototype.storeRange = function () {
+        var range, selection = document.getSelection();
+        range = selection.getRangeAt(0);
+        return this.storedRange = {
+            startContainer: range.startContainer,
+            startOffset: range.startOffset,
+            endContainer: range.endContainer,
+            endOffset: range.endOffset
+        };
+    };
+
+    Editor.prototype.restoreRange = function () {
+        var range, selection = document.getSelection();
+        range = document.createRange();
+        if (this.storedRange) {
+            range.setStart(this.storedRange.startContainer, this.storedRange.startOffset);
+            range.setEnd(this.storedRange.endContainer, this.storedRange.endOffset);
+            selection.removeAllRanges();
+            return selection.addRange(range);
+        } else {
+            return this.selectEnd();
+        }
+    };
+
     Editor.prototype.change = function (editor) {
-        this.element.val(editor.find('div.editor-body').html());
+        this.textareaObj.val(editor.find('div.editor-body').html());
     }
 
+    Editor.prototype.focus = function () {
+        this.contenteditable.focus();
+    }
+
+
     $.fn.smallEditor = function (options) {
-        return this.each(function(){
+        return this.each(function () {
             new Editor(this, options)
         })
     }
