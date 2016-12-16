@@ -114,6 +114,7 @@
 
     Editor.prototype.isStateOn = function (commmand) {
         var _this = this;
+        console.log("=================" + commmand);
         if (document.queryCommandState(commmand) === true) {
             return true;
         } else {
@@ -213,7 +214,7 @@
             console.log("======================empty")
             event.preventDefault();
             $blockquote.after($closestNode);
-            _this.selectContents($closestNode);
+            _this.selectContents($closestNode.contents());
             _this.contenteditable.focus();
         }
     };
