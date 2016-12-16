@@ -58,6 +58,7 @@
             event.preventDefault();
             var command = $(this).data("command");
             if (command) {
+                _this.restoreRange();
                 _this.focus();
                 if (command === 'blockquote') {
                     //document.execCommand('formatBlock', false, command);
@@ -71,18 +72,29 @@
 
         //Editor blur 处理
         _editor.on('blur', '.editor-body', function (event) {
-            _this.storeRange();
+            _this.restoreRange();
+            console.log(_this.storedRange)
             _this.detectState();
         })
-
 
         _editor.on('keyup mouseup', '.editor-body', function (event) {
             _this.detectState();
         })
 
+        _editor.on('keydown', '.editor-body', function(event) {
+            var keyCode = event.keyCode;
+            if (keyCode === 13) {
+                _this.processbBlockquoteEnter(event);
+            }
+        })
+
         // Editor paste 处理
         _editor.on('paste', '.editor-body', function (event) {
-            _this.clearPasteHtml();
+            _this.clearPastedHtml();
+        })
+
+        _this.contenteditable.on('enter', 'blockquote', function() {
+            console.log("======================================>blockquote enter")
         })
         return _editor;
     }
@@ -92,7 +104,6 @@
         var _this = this, _options = _this.optinos, activeClass = _options.activeClass;
         _this.editor.find("[data-command]").each(function (index, element) {
             var command = $(element).data("command");
-            //console.log("==========> has command " + command + "?" + document.queryCommandState(command) )
             if (_this.isStateOn(command)) {
                 $(element).addClass(activeClass);
             } else {
@@ -133,7 +144,7 @@
     };
 
     //清除粘贴的Html标签
-    Editor.prototype.clearPasteHtml = function () {
+    Editor.prototype.clearPastedHtml = function () {
         var _this = this, _contenteditable = _this.contenteditable,
             _options = _this.optinos;
         return setTimeout(function () {
@@ -178,8 +189,8 @@
             $blockquote.replaceWith($contents);
             _this.selectContents($contents);
         } else {
-            start = $(range.startContainer).closest("p, h1, h2, h3, h4, pre")[0];
-            end = $(range.endContainer).closest("p, h1, h2, h3, h4, pre")[0];
+            start = $(range.startContainer).closest("p, h1, h2, h3, h4")[0];
+            end = $(range.endContainer).closest("p, h1, h2, h3, h4")[0];
             range.setStartBefore(start);
             range.setEndAfter(end);
             $blockquote = $("<blockquote>");
@@ -188,11 +199,31 @@
             });
             range.insertNode($blockquote[0]);
             selection.selectAllChildren($blockquote[0]);
-            if ($blockquote.next().length === 0) {
-                $blockquote.after("<p><br></p>");
-            }
         }
     };
+
+    Editor.prototype.processbBlockquoteEnter = function(event) {
+        var _this = this, $blockquote, $closestNode, $contents, end, range, rangeAncestor, selection, start;
+        selection = window.getSelection();
+        range = selection.getRangeAt(0);
+        rangeAncestor = range.commonAncestorContainer;
+        $blockquote = $(rangeAncestor).closest("blockquote");
+        $closestNode = $(rangeAncestor).closest("p");
+        if ($blockquote.length && !$closestNode.next().length && _this.isEmptyNode($closestNode)) {
+            console.log("======================empty")
+            event.preventDefault();
+            $blockquote.after($closestNode);
+            _this.selectContents($closestNode);
+            _this.contenteditable.focus();
+        }
+    };
+
+    //判断是否为空节点
+    Editor.prototype.isEmptyNode = function(node) {
+        var $node = $(node);
+        return $node.is(':empty') || (!$node.text() && !$node.find(':not(b, i, br, u, strike, ul ol li)').length);
+    };
+
 
 
     Editor.prototype.selectEnd = function () {
@@ -236,7 +267,7 @@
 
     $.fn.smallEditor = function (options) {
         return this.each(function () {
-            new Editor(this, options)
+            return new Editor(this, options)
         })
     }
 
