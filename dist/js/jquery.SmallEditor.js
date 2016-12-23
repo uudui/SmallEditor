@@ -54,15 +54,14 @@
         _editor.find(".editor-body").focus();
         _this.detectState();
         //Toolbar 点击处理
-        _editor.on('click', '[data-command]', function (event) {
+        _editor.on('click', 'a[data-command]', function (event) {
             event.preventDefault();
             var command = $(this).data("command");
+            _this.focus();
             if (command) {
-                _this.restoreRange();
-                _this.focus();
                 if (command === 'blockquote') {
-                    //document.execCommand('formatBlock', false, command);
-                    _this.blockquote();
+                    document.execCommand('formatBlock', false, command);
+                    //_this.blockquote();
                 } else {
                     document.execCommand(command, false, null);
                 }
@@ -72,8 +71,7 @@
 
         //Editor blur 处理
         _editor.on('blur', '.editor-body', function (event) {
-            _this.restoreRange();
-            console.log(_this.storedRange)
+           // _this.restoreRange();
             _this.detectState();
         })
 
@@ -84,7 +82,7 @@
         _editor.on('keydown', '.editor-body', function(event) {
             var keyCode = event.keyCode;
             if (keyCode === 13) {
-                _this.processbBlockquoteEnter(event);
+                //_this.processbBlockquoteEnter(event);
             }
         })
 
@@ -93,9 +91,6 @@
             _this.clearPastedHtml();
         })
 
-        _this.contenteditable.on('enter', 'blockquote', function() {
-            console.log("======================================>blockquote enter")
-        })
         return _editor;
     }
 
@@ -114,23 +109,22 @@
 
     Editor.prototype.isStateOn = function (commmand) {
         var _this = this;
-        console.log("=================" + commmand);
         if (document.queryCommandState(commmand) === true) {
             return true;
         } else {
             if (_this.commonAncestorContainer()) {
-                return $(this.commonAncestorContainer()).closest(commmand).length !== 0;
+                return $(_this.commonAncestorContainer()).closest(commmand).length !== 0;
             }
             return false;
         }
-    }
+    };
 
     Editor.prototype.commonAncestorContainer = function () {
         var selection = document.getSelection();
         if (selection.rangeCount !== 0) {
             return selection.getRangeAt(0).commonAncestorContainer;
         }
-    }
+    };
 
     Editor.prototype.selectContents = function (contents) {
         var end, range, selection, start;
@@ -190,6 +184,8 @@
             $blockquote.replaceWith($contents);
             _this.selectContents($contents);
         } else {
+            console.log("==============startContainer:" + range.startContainer);
+            console.log("==============endContainer:" + range.endContainer);
             start = $(range.startContainer).closest("p, h1, h2, h3, h4")[0];
             end = $(range.endContainer).closest("p, h1, h2, h3, h4")[0];
             range.setStartBefore(start);
@@ -228,9 +224,30 @@
 
 
     Editor.prototype.selectEnd = function () {
-        var selection = document.getSelection();
+        this.contenteditable.focus();
+       var selection = document.getSelection();
         selection.selectAllChildren(this.contenteditable[0]);
         return selection.collapseToEnd();
+        /* this.contenteditable.focus();
+        var _this = this, selection, range, $contenteditable = _this.contenteditable[0];
+
+        if (window.getSelection && document.createRange) {
+            range = document.createRange();
+            range.selectNodeContents($contenteditable);
+            range.collapse(true);
+
+            range.setEnd($contenteditable, $contenteditable.childNodes.length);
+            range.setStart($contenteditable, $contenteditable.childNodes.length);
+            selection = document.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        } else if (document.body.createTextRange) {
+            range = document.body.createTextRange();
+            range.moveToElementText($contenteditable);
+            range.collapse(true);
+            range.select();
+        }
+        _this.contenteditable.focus(); */
     };
 
     Editor.prototype.storeRange = function () {
