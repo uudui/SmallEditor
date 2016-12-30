@@ -41,7 +41,7 @@
         TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></div>";
         TOOLBAR_HTML += "</div>";
         EDITOR_HTML += TOOLBAR_HTML;
-        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + this.element.val().trim() + " </div></div>";
+        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + _this.element.val().trim() + "</div></div>";
 
         var _editor = $(EDITOR_HTML);
         this.element.after(_editor);
@@ -207,7 +207,6 @@
         $blockquote = $(rangeAncestor).closest("blockquote");
         $closestNode = $(rangeAncestor).closest("p");
         if ($blockquote.length && !$closestNode.next().length && _this.isEmptyNode($closestNode)) {
-            console.log("======================empty")
             event.preventDefault();
             $blockquote.after($closestNode);
             _this.selectContents($closestNode.contents());
@@ -225,29 +224,9 @@
 
     Editor.prototype.selectEnd = function () {
         this.contenteditable.focus();
-       var selection = document.getSelection();
+        var selection = document.getSelection();
         selection.selectAllChildren(this.contenteditable[0]);
         return selection.collapseToEnd();
-        /* this.contenteditable.focus();
-        var _this = this, selection, range, $contenteditable = _this.contenteditable[0];
-
-        if (window.getSelection && document.createRange) {
-            range = document.createRange();
-            range.selectNodeContents($contenteditable);
-            range.collapse(true);
-
-            range.setEnd($contenteditable, $contenteditable.childNodes.length);
-            range.setStart($contenteditable, $contenteditable.childNodes.length);
-            selection = document.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-        } else if (document.body.createTextRange) {
-            range = document.body.createTextRange();
-            range.moveToElementText($contenteditable);
-            range.collapse(true);
-            range.select();
-        }
-        _this.contenteditable.focus(); */
     };
 
     Editor.prototype.storeRange = function () {
