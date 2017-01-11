@@ -67,16 +67,19 @@
                 }
                 _this.detectState();
             }
+            _this.triggerChange();
         });
 
         //Editor blur 处理
         _editor.on('blur', '.editor-body', function (event) {
            // _this.restoreRange();
             _this.detectState();
+            _this.triggerChange();
         })
 
         _editor.on('keyup mouseup', '.editor-body', function (event) {
             _this.detectState();
+            _this.triggerChange();
         })
 
         _editor.on('keydown', '.editor-body', function(event) {
@@ -89,6 +92,7 @@
         // Editor paste 处理
         _editor.on('paste', '.editor-body', function (event) {
             _this.clearPastedHtml();
+            _this.triggerChange();
         })
 
         return _editor;
@@ -161,6 +165,7 @@
             _contenteditable.find('*').each(function() {
                 var $element = $(this), i;
                 for (i in _options.unAllowedAttrs) {
+                    console.log("===========>" + _options.unAllowedAttrs[i]);
                     $element.removeAttr(_options.unAllowedAttrs[i]);
                 }
             });
@@ -253,8 +258,8 @@
         }
     };
 
-    Editor.prototype.change = function (editor) {
-        this.element.val(editor.find('div.editor-body').html());
+    Editor.prototype.triggerChange = function () {
+        this.element.val(this.contenteditable.html());
     };
 
     Editor.prototype.focus = function () {

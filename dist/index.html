@@ -29,7 +29,7 @@
 </style>
 <div class="main">
     <a href="https://github.com/uudui/SmallEditor"><img style="position: absolute; top: 0; right: 0; border: 0; z-index: 9999" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
-    <form action="#" method="post">
+    <form action="#" method="post" id="editor-form">
         <h1>SmallEditor Example.</h1>
         <textarea name="body" id="post-body"></textarea>
 
@@ -40,7 +40,12 @@
 
 <script type="text/javascript">
     $(function () {
-        var editor = $('#post-body').smallEditor({});
+        $('#post-body').smallEditor({});
+
+        $("#editor-form").on("submit", function(e){
+            alert("提交的内容:" + $('#post-body').val());
+            e.preventDefault();
+        })
     })
 </script>
 
