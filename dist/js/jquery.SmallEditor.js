@@ -10,13 +10,14 @@
     var Editor = function (element, options) {
         this.element = $(element);
         this.optinos = $.extend({}, Editor.DEFAULTS, options);
+
         this.editor = this.buildEditor();
     };
 
     Editor.VERSION = '0.1.0';
 
     Editor.DEFAULTS = {
-        tools: ['bold', 'italic', 'underline', 'strikethrough', 'list-ol', 'list-ul'],
+        tools: ['bold', 'italic', 'underline', 'strikethrough', 'blockquote', 'list-ol', 'list-ul'],
         activeClass: 'active',
         placeholder: '请输入内容…',
         allowedTags: ["p", "br", "img", "a", "b", "i", "strike", "u", "h1", "h2", "h3", "h4", "pre", "code", "ol", "ul", "li", "blockquote"],
@@ -31,14 +32,28 @@
         //TODO 自定义工具栏
         var EDITOR_HTML = "<div class='editor-container'>";
         var TOOLBAR_HTML = "<div class='editor-container' id='editor-container'><div class='editor-toolbar'>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='加粗(Ctr + B)' data-command='bold'><i class='fa fa-bold'></i></a></div>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='斜体(Ctr + I)' data-command='italic'><i class='fa fa-italic'></i></a></div>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='下划线(Ctr + U)' data-command='underline'><i class='fa fa-underline'></i></a></div>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='删除线' data-command='strikethrough'><i class='fa fa-strikethrough'></i></a></div>";
+        if (_this.hasTool("bold")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='加粗(Ctr + B)' data-command='bold'><i class='fa fa-bold'></i></a></div>";
+        }
+        if (_this.hasTool("italic")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='斜体(Ctr + I)' data-command='italic'><i class='fa fa-italic'></i></a></div>";
+        }
+        if (_this.hasTool("underline")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='下划线(Ctr + U)' data-command='underline'><i class='fa fa-underline'></i></a></div>";
+        }
+        if (_this.hasTool("strikethrough")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='删除线' data-command='strikethrough'><i class='fa fa-strikethrough'></i></a></div>";
+        }
         TOOLBAR_HTML += "<div class='separator'></div>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='引用' data-command='blockquote'><i class='fa fa-quote-left'></i></a></div>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='有序列表' data-command='insertOrderedList'><i class='fa fa-list-ol'></i></a></div>";
-        TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></div>";
+        if (_this.hasTool("blockquote")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='引用' data-command='blockquote'><i class='fa fa-quote-left'></i></a></div>";
+        }
+        if (_this.hasTool("list-ol")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='有序列表' data-command='insertOrderedList'><i class='fa fa-list-ol'></i></a></div>";
+        }
+        if (_this.hasTool("list-ul")) {
+            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></div>";
+        }
         TOOLBAR_HTML += "</div>";
         EDITOR_HTML += TOOLBAR_HTML;
         EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + _this.element.val().trim() + "</div></div>";
@@ -96,6 +111,11 @@
         })
 
         return _editor;
+    }
+
+    Editor.prototype.hasTool = function(tool) {
+        var _tools = this.optinos.tools;
+        return $.inArray(tool, _tools) > -1;
     }
 
 
