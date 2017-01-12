@@ -40,7 +40,7 @@
 
 <script type="text/javascript">
     $(function () {
-        $('#post-body').smallEditor({tools: ['bold', 'italic', 'blockquote', 'list-ol', 'list-ul']});
+        $('#post-body').smallEditor({tools: ['bold', 'italic', '|', 'blockquote', 'orderedList', 'unorderedList1']});
 
         $("#editor-form").on("submit", function(e){
             alert("提交的内容:" + $('#post-body').val());

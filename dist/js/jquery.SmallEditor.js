@@ -17,7 +17,16 @@
     Editor.VERSION = '0.1.0';
 
     Editor.DEFAULTS = {
-        tools: ['bold', 'italic', 'underline', 'strikethrough', 'blockquote', 'list-ol', 'list-ul'],
+        tools: ['bold', 'italic', 'underline', 'strikethrough', 'blockquote', 'orderedList', 'unorderedList'],
+        toolsConfig: {
+            bold: {title: '加粗(Ctr + B)', command: 'bold', icon: 'fa fa-bold'},
+            italic: {title: '斜体(Ctr + I)', command: 'italic', icon: 'fa fa-italic'},
+            underline: {title: '下划线(Ctr + U)', command: 'underline', icon: 'fa fa-underline'},
+            strikethrough: {title: '删除线', command: 'strikethrough', icon: 'fa fa-strikethrough'},
+            blockquote: {title: '引用', command: 'blockquote', icon: 'fa fa-quote-left'},
+            orderedList: {title: '有序列表', command: 'insertOrderedList', icon: 'fa fa-list-ol'},
+            unorderedList: {title: '无序列表', command: 'insertUnorderedList', icon: 'fa fa-list-ul'}
+        },
         activeClass: 'active',
         placeholder: '请输入内容…',
         allowedTags: ["p", "br", "img", "a", "b", "i", "strike", "u", "h1", "h2", "h3", "h4", "pre", "code", "ol", "ul", "li", "blockquote"],
@@ -26,44 +35,35 @@
 
     //Editor 初始化
     Editor.prototype.buildEditor = function () {
-        var _this = this, _options = _this.optinos;
+        var _this = this, _options = _this.optinos, _tools = _options.tools, _toolsConfig = _options.toolsConfig;
         _this.setDefaultParagraphSeparator();
-        //var tools = options.tools;
+
         //TODO 自定义工具栏
         var EDITOR_HTML = "<div class='editor-container'>";
         var TOOLBAR_HTML = "<div class='editor-container' id='editor-container'><div class='editor-toolbar'>";
-        if (_this.hasTool("bold")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='加粗(Ctr + B)' data-command='bold'><i class='fa fa-bold'></i></a></div>";
-        }
-        if (_this.hasTool("italic")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='斜体(Ctr + I)' data-command='italic'><i class='fa fa-italic'></i></a></div>";
-        }
-        if (_this.hasTool("underline")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='下划线(Ctr + U)' data-command='underline'><i class='fa fa-underline'></i></a></div>";
-        }
-        if (_this.hasTool("strikethrough")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='删除线' data-command='strikethrough'><i class='fa fa-strikethrough'></i></a></div>";
-        }
-        TOOLBAR_HTML += "<div class='separator'></div>";
-        if (_this.hasTool("blockquote")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='引用' data-command='blockquote'><i class='fa fa-quote-left'></i></a></div>";
-        }
-        if (_this.hasTool("list-ol")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='有序列表' data-command='insertOrderedList'><i class='fa fa-list-ol'></i></a></div>";
-        }
-        if (_this.hasTool("list-ul")) {
-            TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='无序列表' data-command='insertUnorderedList'><i class='fa fa-list-ul'></i></a></div>";
+        for (var i = 0; i < _tools.length; i++) {
+            //如果是分割线
+            if (_tools[i] === '|') {
+                TOOLBAR_HTML += "<div class='separator'></div>";
+            } else {
+                var currentTool = _toolsConfig[_tools[i]];
+                if (typeof currentTool != 'undefined' ) {
+                    TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='" + currentTool.title + "' " +
+                        "data-command='" + currentTool.command + "'><i class='" + currentTool.icon + "'></i></a></div>";
+                }
+            }
         }
         TOOLBAR_HTML += "</div>";
         EDITOR_HTML += TOOLBAR_HTML;
-        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' placeholder='" + _options.placeholder + "'>" + _this.element.val().trim() + "</div></div>";
+        EDITOR_HTML += "<div class='editor-body-container'><div class='editor-body' contenteditable='true' " +
+            "placeholder='" + _options.placeholder + "'>" + _this.element.val().trim() + "</div></div>";
 
         var _editor = $(EDITOR_HTML);
         this.element.after(_editor);
         this.element.hide();
 
         _this.contenteditable = _editor.find(".editor-body");
-        _this.editor =_editor;
+        _this.editor = _editor;
 
         _this.selectEnd();
         _editor.find(".editor-body").focus();
@@ -87,7 +87,7 @@
 
         //Editor blur 处理
         _editor.on('blur', '.editor-body', function (event) {
-           // _this.restoreRange();
+            // _this.restoreRange();
             _this.detectState();
             _this.triggerChange();
         })
@@ -97,7 +97,7 @@
             _this.triggerChange();
         })
 
-        _editor.on('keydown', '.editor-body', function(event) {
+        _editor.on('keydown', '.editor-body', function (event) {
             var keyCode = event.keyCode;
             if (keyCode === 13) {
                 //_this.processbBlockquoteEnter(event);
@@ -113,7 +113,7 @@
         return _editor;
     }
 
-    Editor.prototype.hasTool = function(tool) {
+    Editor.prototype.hasTool = function (tool) {
         var _tools = this.optinos.tools;
         return $.inArray(tool, _tools) > -1;
     }
@@ -182,7 +182,7 @@
                 }
             });
 
-            _contenteditable.find('*').each(function() {
+            _contenteditable.find('*').each(function () {
                 var $element = $(this), i;
                 for (i in _options.unAllowedAttrs) {
                     console.log("===========>" + _options.unAllowedAttrs[i]);
@@ -198,7 +198,7 @@
         document.execCommand('defaultParagraphSeparator', false, 'p');
     };
 
-    Editor.prototype.blockquote = function() {
+    Editor.prototype.blockquote = function () {
         var _this = this, $blockquote, $contents, end, range, rangeAncestor, selection, start;
         selection = window.getSelection();
         range = selection.getRangeAt(0);
@@ -216,7 +216,7 @@
             range.setStartBefore(start);
             range.setEndAfter(end);
             $blockquote = $("<blockquote>");
-            $blockquote.html(range.extractContents()).find("blockquote").each(function() {
+            $blockquote.html(range.extractContents()).find("blockquote").each(function () {
                 return $(this).replaceWith($(this).html());
             });
             range.insertNode($blockquote[0]);
@@ -224,7 +224,7 @@
         }
     };
 
-    Editor.prototype.processbBlockquoteEnter = function(event) {
+    Editor.prototype.processbBlockquoteEnter = function (event) {
         var _this = this, $blockquote, $closestNode, $contents, end, range, rangeAncestor, selection, start;
         selection = window.getSelection();
         range = selection.getRangeAt(0);
@@ -240,11 +240,10 @@
     };
 
     //判断是否为空节点
-    Editor.prototype.isEmptyNode = function(node) {
+    Editor.prototype.isEmptyNode = function (node) {
         var $node = $(node);
         return $node.is(':empty') || (!$node.text() && !$node.find(':not(b, i, br, u, strike, ul ol li)').length);
     };
-
 
 
     Editor.prototype.selectEnd = function () {
