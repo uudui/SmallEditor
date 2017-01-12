@@ -47,7 +47,7 @@
                 TOOLBAR_HTML += "<div class='separator'></div>";
             } else {
                 var currentTool = _toolsConfig[_tools[i]];
-                if (typeof currentTool != 'undefined' ) {
+                if (typeof currentTool != 'undefined') {
                     TOOLBAR_HTML += "<div class='editor-btn'><a href='#' title='" + currentTool.title + "' " +
                         "data-command='" + currentTool.command + "'><i class='" + currentTool.icon + "'></i></a></div>";
                 }
@@ -75,8 +75,8 @@
             _this.focus();
             if (command) {
                 if (command === 'blockquote') {
-                    document.execCommand('formatBlock', false, command);
-                    //_this.blockquote();
+                    //document.execCommand('formatBlock', false, command);
+                    _this.blockquote();
                 } else {
                     document.execCommand(command, false, null);
                 }
@@ -185,7 +185,6 @@
             _contenteditable.find('*').each(function () {
                 var $element = $(this), i;
                 for (i in _options.unAllowedAttrs) {
-                    console.log("===========>" + _options.unAllowedAttrs[i]);
                     $element.removeAttr(_options.unAllowedAttrs[i]);
                 }
             });
@@ -199,7 +198,7 @@
     };
 
     Editor.prototype.blockquote = function () {
-        var _this = this, $blockquote, $contents, end, range, rangeAncestor, selection, start;
+        var _this = this, $blockquote, $contents, range, rangeAncestor, selection;
         selection = window.getSelection();
         range = selection.getRangeAt(0);
         rangeAncestor = range.commonAncestorContainer;
@@ -209,72 +208,16 @@
             $blockquote.replaceWith($contents);
             _this.selectContents($contents);
         } else {
-            console.log("==============startContainer:" + range.startContainer);
-            console.log("==============endContainer:" + range.endContainer);
-            start = $(range.startContainer).closest("p, h1, h2, h3, h4")[0];
-            end = $(range.endContainer).closest("p, h1, h2, h3, h4")[0];
-            range.setStartBefore(start);
-            range.setEndAfter(end);
-            $blockquote = $("<blockquote>");
-            $blockquote.html(range.extractContents()).find("blockquote").each(function () {
-                return $(this).replaceWith($(this).html());
-            });
-            range.insertNode($blockquote[0]);
-            selection.selectAllChildren($blockquote[0]);
+            document.execCommand('formatBlock', false, 'blockquote');
+            $blockquote = $(rangeAncestor).closest("blockquote");
         }
     };
-
-    Editor.prototype.processbBlockquoteEnter = function (event) {
-        var _this = this, $blockquote, $closestNode, $contents, end, range, rangeAncestor, selection, start;
-        selection = window.getSelection();
-        range = selection.getRangeAt(0);
-        rangeAncestor = range.commonAncestorContainer;
-        $blockquote = $(rangeAncestor).closest("blockquote");
-        $closestNode = $(rangeAncestor).closest("p");
-        if ($blockquote.length && !$closestNode.next().length && _this.isEmptyNode($closestNode)) {
-            event.preventDefault();
-            $blockquote.after($closestNode);
-            _this.selectContents($closestNode.contents());
-            _this.contenteditable.focus();
-        }
-    };
-
-    //判断是否为空节点
-    Editor.prototype.isEmptyNode = function (node) {
-        var $node = $(node);
-        return $node.is(':empty') || (!$node.text() && !$node.find(':not(b, i, br, u, strike, ul ol li)').length);
-    };
-
 
     Editor.prototype.selectEnd = function () {
         this.contenteditable.focus();
         var selection = document.getSelection();
         selection.selectAllChildren(this.contenteditable[0]);
         return selection.collapseToEnd();
-    };
-
-    Editor.prototype.storeRange = function () {
-        var range, selection = document.getSelection();
-        range = selection.getRangeAt(0);
-        return this.storedRange = {
-            startContainer: range.startContainer,
-            startOffset: range.startOffset,
-            endContainer: range.endContainer,
-            endOffset: range.endOffset
-        };
-    };
-
-    Editor.prototype.restoreRange = function () {
-        var range, selection = document.getSelection();
-        range = document.createRange();
-        if (this.storedRange) {
-            range.setStart(this.storedRange.startContainer, this.storedRange.startOffset);
-            range.setEnd(this.storedRange.endContainer, this.storedRange.endOffset);
-            selection.removeAllRanges();
-            return selection.addRange(range);
-        } else {
-            return this.selectEnd();
-        }
     };
 
     Editor.prototype.triggerChange = function () {
